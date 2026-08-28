@@ -13,7 +13,7 @@ As seguintes ferramentas são utilizadas no projeto:
 - **Framework Web:** Express
 - **Banco de Dados:** MySQL
 - **ORM:** TypeORM
-- **Drivers e Utilitários:** mysql2, dotenv, reflect-metadata, concurrently, ts-node
+- **Drivers e Utilitários:** mysql2, dotenv, reflect, concurrently, ts-node
 
 ## 📋 Requisitos
 
