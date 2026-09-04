@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "target": "es2016", /* Set the JavaScript language version for emitted JavaScript and include compatible library declarations. */
-    "module": "nodenext", /* Specify what module code is generated. */
+    "module": "commonjs", /* Specify what module code is generated. */
     "outDir": "./dist", //diretorio de saída dos arquivos já para a visualização
     "rootDir": "./src",
     "esModuleInterop": true, /* Emit additional JavaScript to ease support for importing CommonJS modules. This enables 'allowSyntheticDefaultImports' for type compatibility. */
@@ -12,6 +12,6 @@
     "experimentalDecorators": true,
     "resolveJsonModule": true,
     "ignoreDeprecations": "6.0",
-    "moduleResolution": "nodenext"
+    //"moduleResolution": "nodenext"
   }
 }
