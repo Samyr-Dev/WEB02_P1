@@ -6,17 +6,16 @@ dotenv.config();
 
 const app = express();
 
-import loginRouter from "./controllers/login";
+app.use(express.json());
+
+import AuthController from "./controllers/AuthController";
+import SituationsController from "./controllers/SituationsController";
+
 
 import { AppDataSource } from "./data-source";
 
-app.use("/", loginRouter);
-
-AppDataSource.initialize().then(() => {
-    console.log("Data Source iniciou com sucesso!");
-}).catch((error) => {
-    console.error("Error na conexão com o banco de dados", error);
-});
+app.use("/", AuthController);
+app.use("/", SituationsController);
 
 app.listen(process.env.PORT, () => {
     console.log(`Acesse: http://localhost:${process.env.PORT}`);
