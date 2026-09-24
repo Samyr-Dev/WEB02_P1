@@ -23,7 +23,6 @@ router.get("/situations", async (req: Request, res: Response) => {
         });
         return;
     }
-
 });
 
 
@@ -37,27 +36,95 @@ router.get("/situations/:id", async (req: Request, res: Response) => {
         const situation = await situationRepository.findOne({
             where: {
                 id: Number(id)
-            }});
-    
-        if (!situation) {
-        res.status(404).json({
-            message: "Situação não encontrada!"
+            }
         });
-        return;
+
+        if (!situation) {
+            res.status(404).json({
+                message: "Situação não encontrada com o ID fornecido!"
+            });
+            return;
+        }
+        res.status(200).json(situation);
     }
-    res.status(200).json(situation);
-}
 
     catch (error) {
-    res.status(500).json({
-        message: "Erro ao listar situações!"
-    });
-}
+        res.status(500).json({
+            message: "Erro ao listar situações!"
+        });
+    }
 });
 
 
 
+//Alterar a visualização do item cadastrado em situação
+router.put("/situations/:id", async (req: Request, res: Response) => {
+    try {
 
+        var data = req.body;
+
+        const { id } = req.params;
+
+        const { nameSituation } = req.body;
+
+
+        if (nameSituation === "" || nameSituation === undefined || nameSituation === null || nameSituation.trim() === "" || nameSituation.length === 0 || !nameSituation) {
+            res.status(400).json({
+                message: "O campo 'nameSituation' é obrigatório!"
+            });
+            return;
+        }
+
+        const situationRepository = AppDataSource.getRepository(Situation);
+
+
+        const situation = await situationRepository.findOne({
+            where: {
+                id: Number(id)
+            }
+        });
+
+        if (!situation) {
+            res.status(404).json({
+                message: "Situação não encontrada!"
+            });
+            return;
+        }
+
+
+
+
+        const existingSituation = await situationRepository.findOne({
+            where: { nameSituation }
+        });
+
+        if (existingSituation && existingSituation.id !== Number(id)) {
+            res.status(400).json({
+                message: "Já existe uma situação com esse nome!"
+            });
+            return;
+        }
+
+
+
+
+
+
+        //atualiza os dados
+        situationRepository.merge(situation, data);
+        const updateSituation = await situationRepository.save(situation);
+        res.status(200).json({
+            message: "Situação atualizada com sucesso!",
+            situation: updateSituation
+        });
+    }
+
+    catch (error) {
+        res.status(500).json({
+            message: "Erro ao atualizar situações!"
+        });
+    }
+});
 
 
 
@@ -65,15 +132,40 @@ router.get("/situations/:id", async (req: Request, res: Response) => {
 router.post("/situations", async (req: Request, res: Response) => {
     try {
         var data = req.body;
+
+
+        const { nameSituation } = req.body;
+
+        if (nameSituation === "" || nameSituation === undefined || nameSituation === null || nameSituation.trim() === "" || nameSituation.length === 0 || !nameSituation) {
+            res.status(400).json({
+                message: "O campo 'nameSituation' é obrigatório!"
+            });
+            return;
+        }
+
         const situationRepository = AppDataSource.getRepository(Situation);
 
-        const newSituation = situationRepository.create(data);
-
-        await situationRepository.save(newSituation);
-        res.status(201).json({
-            message: "Situação cadastrada com sucesso!",
-            situation: newSituation
+        const existingSituation = await situationRepository.findOne({
+            where: { nameSituation }
         });
+
+        if (existingSituation) {
+            res.status(400).json({
+                message: "Já existe uma situação com esse nome!"
+            });
+            return;
+        }
+
+        else {
+            const newSituation = situationRepository.create(data);
+
+            await situationRepository.save(newSituation);
+
+            res.status(201).json({
+                message: "Situação cadastrada com sucesso!",
+                situation: newSituation
+            });
+        }
     }
     catch (error) {
         res.status(500).json({
