@@ -128,6 +128,48 @@ router.put("/situations/:id", async (req: Request, res: Response) => {
 
 
 
+
+//Remover a visualização do item cadastrado em situação
+router.delete("/situations/:id", async (req: Request, res: Response) => {
+    try {
+
+        const { id } = req.params;
+
+
+        const situationRepository = AppDataSource.getRepository(Situation);
+
+
+        const situation = await situationRepository.findOne({
+            where: {
+                id: Number(id)
+            }
+        });
+
+        if (!situation) {
+            res.status(404).json({
+                message: "Situação não encontrada!"
+            });
+            return;
+        }
+
+
+
+        //Remover os dados
+        await situationRepository.remove(situation);
+        res.status(200).json({
+            message: "Situação excluída com sucesso!",
+        });
+    }
+
+    catch (error) {
+        res.status(500).json({
+            message: "Erro ao remover situações!"
+        });
+    }
+});
+
+
+
 //Criar a LISTA de situações cadastradas no banco de dados    
 router.post("/situations", async (req: Request, res: Response) => {
     try {
