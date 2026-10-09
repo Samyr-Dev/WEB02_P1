@@ -12,9 +12,50 @@ router.get("/situations", async (req: Request, res: Response) => {
 
     try {
         const situationRepository = AppDataSource.getRepository(Situation);
-        const situations = await situationRepository.find();
-        res.status(200).json(situations);
+
+        const page = Number(req.query.page) || 1;
+
+        const limit = 2;
+
+        const totalSituations = await situationRepository.count();
+
+        if (totalSituations === 0) {
+            res.status(400).json({
+                message: "Nenhuma situação foi encontrada!"
+            });
+            return;
+        }
+
+        const lastPage = Math.ceil(totalSituations / limit);
+
+        if (page > lastPage) {
+            res.status(400).json({
+                message: 'A página solicitada não existe! O total de páginas disponíveis é: ' + lastPage
+            });
+            return;
+        }
+
+        const offeset = (page - 1) * limit;
+
+        const situations = await situationRepository.find(
+            {
+                take: limit,
+                skip: offeset,
+                order: {
+                    id: "DESC"
+                }
+            }
+        );
+        res.status(200).json(
+            {
+                currentPage: page,
+                lastPage,
+                totalSituations,
+                situations
+            }
+        );
         return;
+
     }
     catch (error) {
         res.status(500).json({
