@@ -206,7 +206,7 @@ router.post("/situations", async (req: Request, res: Response) => {
 
         if (existingSituation) {
             res.status(400).json({
-                message: "Já existe uma situação com esse nome!"
+                message: "Já existe uma situação com esse nome! Atualize-a com o método PUT ou escolha outro nome para a nova situação."
             });
             return;
         }

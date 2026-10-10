@@ -7,12 +7,12 @@ export class Users {
     id!: number;
 
     @Column()
-    nome!: string;
+    name!: string;
 
     @Column({ unique: true })
     email!: string;
 
-    @ManyToOne(() => Situation, (situation) => situation.users)
+    @ManyToOne(() => Situation, (situation) => situation)
     @JoinColumn({ name: "situationId" })
     situation!: Situation;
 
