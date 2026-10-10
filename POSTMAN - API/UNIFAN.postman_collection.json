@@ -1,0 +1,667 @@
+{
+  "info": {
+    "_postman_id": "89cd4ab6-549c-432f-bc34-53c76c033811",
+    "name": "UNIFAN",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "43094967"
+  },
+  "items": [
+    {
+      "name": "WEB2",
+      "item": [
+        {
+          "name": "Situation",
+          "item": [
+            {
+              "name": "Consulta",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{ambiente}}/situations?page=1&limit=-1",
+                  "host": [
+                    "{{ambiente}}"
+                  ],
+                  "path": [
+                    "situations"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "-1"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Consulta por ID",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{ambiente}}/situations/{{ID}}",
+                  "host": [
+                    "{{ambiente}}"
+                  ],
+                  "path": [
+                    "situations",
+                    "{{ID}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "",
+                      "value": "",
+                      "disabled": true
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Criação",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"nameSituation\":\"Teste1\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{ambiente}}/situations",
+                  "host": [
+                    "{{ambiente}}"
+                  ],
+                  "path": [
+                    "situations"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Alteração",
+              "request": {
+                "method": "PUT",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"nameSituation\":\"Teste\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{ambiente}}/situations/{{ID}}",
+                  "host": [
+                    "{{ambiente}}"
+                  ],
+                  "path": [
+                    "situations",
+                    "{{ID}}"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Remoção",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{ambiente}}/situations/{{ID}}",
+                  "host": [
+                    "{{ambiente}}"
+                  ],
+                  "path": [
+                    "situations",
+                    "{{ID}}"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Product_Categories",
+          "item": [
+            {
+              "name": "Consulta",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{ambiente}}/product-categories?page=1&limit=1",
+                  "host": [
+                    "{{ambiente}}"
+                  ],
+                  "path": [
+                    "product-categories"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "1"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Consulta por ID",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{ambiente}}/product-categories/{{ID}}",
+                  "host": [
+                    "{{ambiente}}"
+                  ],
+                  "path": [
+                    "product-categories",
+                    "{{ID}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "",
+                      "value": "",
+                      "disabled": true
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Criação",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"nameProductCategories\":\"Teste1\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{ambiente}}/product-categories",
+                  "host": [
+                    "{{ambiente}}"
+                  ],
+                  "path": [
+                    "product-categories"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Alteração",
+              "request": {
+                "method": "PUT",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"nameProductCategories\":\"Teste\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{ambiente}}/product-categories/{{ID}}",
+                  "host": [
+                    "{{ambiente}}"
+                  ],
+                  "path": [
+                    "product-categories",
+                    "{{ID}}"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Remoção",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{ambiente}}/product-categories/{{ID}}",
+                  "host": [
+                    "{{ambiente}}"
+                  ],
+                  "path": [
+                    "product-categories",
+                    "{{ID}}"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Product_Situation",
+          "item": [
+            {
+              "name": "Consulta",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{ambiente}}/product-situations?page=1&limit=1",
+                  "host": [
+                    "{{ambiente}}"
+                  ],
+                  "path": [
+                    "product-situations"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "1"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Consulta por ID",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{ambiente}}/product-situations/{{ID}}",
+                  "host": [
+                    "{{ambiente}}"
+                  ],
+                  "path": [
+                    "product-situations",
+                    "{{ID}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "",
+                      "value": "",
+                      "disabled": true
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Criação",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"nameProductSituations\":\"Teste1\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{ambiente}}/product-situations",
+                  "host": [
+                    "{{ambiente}}"
+                  ],
+                  "path": [
+                    "product-situations"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Alteração",
+              "request": {
+                "method": "PUT",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"nameProductSituations\":\"Teste\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{ambiente}}/product-situations/{{ID}}",
+                  "host": [
+                    "{{ambiente}}"
+                  ],
+                  "path": [
+                    "product-situations",
+                    "{{ID}}"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Remoção",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{ambiente}}/product-situations/{{ID}}",
+                  "host": [
+                    "{{ambiente}}"
+                  ],
+                  "path": [
+                    "product-situations",
+                    "{{ID}}"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Users",
+          "item": [
+            {
+              "name": "Consulta",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{ambiente}}/users?page=1&limit=1",
+                  "host": [
+                    "{{ambiente}}"
+                  ],
+                  "path": [
+                    "users"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "1"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Consulta por ID",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{ambiente}}/users/{{ID}}",
+                  "host": [
+                    "{{ambiente}}"
+                  ],
+                  "path": [
+                    "users",
+                    "{{ID}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "",
+                      "value": "",
+                      "disabled": true
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Criação",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"name\":\"Teste1\",\r\n    \"email\":\"tomatoma@tagostoso.com\",\r\n    \"situationId\":1\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{ambiente}}/users",
+                  "host": [
+                    "{{ambiente}}"
+                  ],
+                  "path": [
+                    "users"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Alteração",
+              "request": {
+                "method": "PUT",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"name\":\"Teste\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{ambiente}}/users/{{ID}}",
+                  "host": [
+                    "{{ambiente}}"
+                  ],
+                  "path": [
+                    "users",
+                    "{{ID}}"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Remoção",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{ambiente}}/users/{{ID}}",
+                  "host": [
+                    "{{ambiente}}"
+                  ],
+                  "path": [
+                    "users",
+                    "{{ID}}"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Products",
+          "item": [
+            {
+              "name": "Consulta",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{ambiente}}/products?page=1&limit=1",
+                  "host": [
+                    "{{ambiente}}"
+                  ],
+                  "path": [
+                    "products"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "1"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Consulta por ID",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{ambiente}}/products/{{ID}}",
+                  "host": [
+                    "{{ambiente}}"
+                  ],
+                  "path": [
+                    "products",
+                    "{{ID}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "",
+                      "value": "",
+                      "disabled": true
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Criação",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"nameProduct\":\"Teste1\",\r\n    \"price\":\"123\",\r\n    \"productCategoryId\":2,\r\n    \"productSituationId\":2\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{ambiente}}/products",
+                  "host": [
+                    "{{ambiente}}"
+                  ],
+                  "path": [
+                    "products"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Alteração",
+              "request": {
+                "method": "PUT",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"nameProduct\":\"Teste\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{ambiente}}/products/{{ID}}",
+                  "host": [
+                    "{{ambiente}}"
+                  ],
+                  "path": [
+                    "products",
+                    "{{ID}}"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Remoção",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{ambiente}}/products/{{ID}}",
+                  "host": [
+                    "{{ambiente}}"
+                  ],
+                  "path": [
+                    "products",
+                    "{{ID}}"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "ambiente",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "ID",
+      "value": "1",
+      "type": "string"
+    }
+  ]
+}
