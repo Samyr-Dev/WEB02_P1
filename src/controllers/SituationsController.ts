@@ -2,6 +2,7 @@
 import express, { Request, Response } from "express";
 import { AppDataSource } from "../data-source";
 import { Situation } from "../entity/Situation";
+import { PaginationService } from "../services/PaginationServices";
 
 
 const router = express.Router();
@@ -15,51 +16,22 @@ router.get("/situations", async (req: Request, res: Response) => {
 
         const page = Number(req.query.page) || 1;
 
-        const limit = 2;
+        //Define o limite de itens por página, se não for definido fica 5. 
+        const limit = Number(req.query.limit) || 5;
 
-        const totalSituations = await situationRepository.count();
+        
 
-        if (totalSituations === 0) {
-            res.status(400).json({
-                message: "Nenhuma situação foi encontrada!"
-            });
-            return;
-        }
 
-        const lastPage = Math.ceil(totalSituations / limit);
+        const result = await PaginationService.paginate(situationRepository, page, limit, { id: "DESC" });
 
-        if (page > lastPage) {
-            res.status(400).json({
-                message: 'A página solicitada não existe! O total de páginas disponíveis é: ' + lastPage
-            });
-            return;
-        }
-
-        const offeset = (page - 1) * limit;
-
-        const situations = await situationRepository.find(
-            {
-                take: limit,
-                skip: offeset,
-                order: {
-                    id: "DESC"
-                }
-            }
-        );
-        res.status(200).json(
-            {
-                currentPage: page,
-                lastPage,
-                totalSituations,
-                situations
-            }
-        );
+        res.status(200).json(result);
         return;
 
     }
-    catch (error) {
-        res.status(500).json({
-            message: "Erro ao buscar situações!"
+    catch (error : any) {
+        res.status(400).json({
+            error: true,
+            message: error.message || "Erro ao buscar situações!"
 
         });
         return;
