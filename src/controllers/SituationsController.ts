@@ -3,6 +3,7 @@ import express, { Request, Response } from "express";
 import { AppDataSource } from "../data-source";
 import { Situation } from "../entity/Situation";
 import { PaginationService } from "../services/PaginationServices";
+import * as yup from "yup";
 
 
 const router = express.Router();
@@ -19,7 +20,7 @@ router.get("/situations", async (req: Request, res: Response) => {
         //Define o limite de itens por página, se não for definido fica 5. 
         const limit = Number(req.query.limit) || 5;
 
-        
+
 
 
         const result = await PaginationService.paginate(situationRepository, page, limit, { id: "DESC" });
@@ -28,7 +29,7 @@ router.get("/situations", async (req: Request, res: Response) => {
         return;
 
     }
-    catch (error : any) {
+    catch (error: any) {
         res.status(400).json({
             error: true,
             message: error.message || "Erro ao buscar situações!"
@@ -78,18 +79,29 @@ router.put("/situations/:id", async (req: Request, res: Response) => {
 
         const { id } = req.params;
 
+        /* Substituindo a validação manual por validação com o Yup, que é mais robusta e flexível.
         const { nameSituation } = req.body;
 
-
+        
         if (nameSituation === "" || nameSituation === undefined || nameSituation === null || nameSituation.trim() === "" || nameSituation.length === 0 || !nameSituation) {
             res.status(400).json({
                 message: "O campo 'nameSituation' é obrigatório!"
             });
             return;
         }
+        */
 
         const situationRepository = AppDataSource.getRepository(Situation);
 
+
+        const schema = yup.object().shape({
+            nameSituation: yup.string()
+                .required("O campo 'nameSituation' é obrigatório!")
+                .min(3, "O campo 'nameSituation' deve ter pelo menos 2 caracteres.")
+        });
+
+
+        await schema.validate(data, { abortEarly: false });
 
         const situation = await situationRepository.findOne({
             where: {
@@ -106,7 +118,7 @@ router.put("/situations/:id", async (req: Request, res: Response) => {
 
 
 
-
+        /* Retirando a validação manual de duplicidade, pois o TypeORM já faz isso automaticamente com a propriedade unique no entity Situation.
         const existingSituation = await situationRepository.findOne({
             where: { nameSituation }
         });
@@ -117,6 +129,7 @@ router.put("/situations/:id", async (req: Request, res: Response) => {
             });
             return;
         }
+        */
 
 
 
@@ -133,6 +146,13 @@ router.put("/situations/:id", async (req: Request, res: Response) => {
     }
 
     catch (error) {
+        if (error instanceof yup.ValidationError) {
+            const validationErrors = error.inner.map((err) => err.message);
+            res.status(400).json({
+                message: error.errors
+            });
+            return;
+        }
         res.status(500).json({
             message: "Erro ao atualizar situações!"
         });
@@ -188,7 +208,7 @@ router.post("/situations", async (req: Request, res: Response) => {
     try {
         var data = req.body;
 
-
+        /* Trocando a validação manual por validação com o Yup, que é mais robusta e flexível.
         const { nameSituation } = req.body;
 
         if (nameSituation === "" || nameSituation === undefined || nameSituation === null || nameSituation.trim() === "" || nameSituation.length === 0 || !nameSituation) {
@@ -198,8 +218,20 @@ router.post("/situations", async (req: Request, res: Response) => {
             return;
         }
 
+        */
+
+        const schema = yup.object().shape({
+            nameSituation: yup.string()
+                .required("O campo 'nameSituation' é obrigatório!")
+                .min(3, "O campo 'nameSituation' deve ter pelo menos 2 caracteres.")
+        });
+
+
+        await schema.validate(data, { abortEarly: false });
+
         const situationRepository = AppDataSource.getRepository(Situation);
 
+        /* Retirando a validação manual de duplicidade, pois o TypeORM já faz isso automaticamente com a propriedade unique no entity Situation.
         const existingSituation = await situationRepository.findOne({
             where: { nameSituation }
         });
@@ -209,20 +241,27 @@ router.post("/situations", async (req: Request, res: Response) => {
                 message: "Já existe uma situação com esse nome! Atualize-a com o método PUT ou escolha outro nome para a nova situação."
             });
             return;
-        }
+        }*/
 
-        else {
-            const newSituation = situationRepository.create(data);
 
-            await situationRepository.save(newSituation);
+        const newSituation = situationRepository.create(data);
 
-            res.status(201).json({
-                message: "Situação cadastrada com sucesso!",
-                situation: newSituation
-            });
-        }
+        await situationRepository.save(newSituation);
+
+        res.status(201).json({
+            message: "Situação cadastrada com sucesso!",
+            situation: newSituation
+        });
     }
+
     catch (error) {
+        if (error instanceof yup.ValidationError) {
+            const validationErrors = error.inner.map((err) => err.message);
+            res.status(400).json({
+                message: error.errors
+            });
+            return;
+        }
         res.status(500).json({
             message: "Erro ao cadastrar situação!"
         });
