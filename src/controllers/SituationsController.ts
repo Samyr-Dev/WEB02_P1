@@ -4,6 +4,8 @@ import { AppDataSource } from "../data-source";
 import { Situation } from "../entity/Situation";
 import { PaginationService } from "../services/PaginationServices";
 import * as yup from "yup";
+import { Not } from "typeorm";
+
 
 
 const router = express.Router();
@@ -75,9 +77,13 @@ router.get("/situations/:id", async (req: Request, res: Response) => {
 router.put("/situations/:id", async (req: Request, res: Response) => {
     try {
 
+        const { id } = req.params;
+
         var data = req.body;
 
-        const { id } = req.params;
+
+
+
 
         /* Substituindo a validação manual por validação com o Yup, que é mais robusta e flexível.
         const { nameSituation } = req.body;
@@ -91,7 +97,7 @@ router.put("/situations/:id", async (req: Request, res: Response) => {
         }
         */
 
-        const situationRepository = AppDataSource.getRepository(Situation);
+
 
 
         const schema = yup.object().shape({
@@ -103,10 +109,12 @@ router.put("/situations/:id", async (req: Request, res: Response) => {
 
         await schema.validate(data, { abortEarly: false });
 
-        const situation = await situationRepository.findOne({
-            where: {
-                id: Number(id)
-            }
+        const situationRepository = AppDataSource.getRepository(Situation);
+
+
+
+        const situation = await situationRepository.findOneBy({
+            id  : Number(id)
         });
 
         if (!situation) {
@@ -130,6 +138,21 @@ router.put("/situations/:id", async (req: Request, res: Response) => {
             return;
         }
         */
+
+
+        const existingSituation = await situationRepository.findOne({
+            where: {
+                nameSituation: data.nameSituation,
+                id : Not(Number(id))
+            }
+        });
+
+        if (existingSituation) {
+            res.status(400).json({
+                message: "Já existe uma situação com esse nome! Atualize a situação já existente ou escolha outro nome para a nova situação."
+            });
+            return;
+        }
 
 
 
@@ -231,9 +254,9 @@ router.post("/situations", async (req: Request, res: Response) => {
 
         const situationRepository = AppDataSource.getRepository(Situation);
 
-        /* Retirando a validação manual de duplicidade, pois o TypeORM já faz isso automaticamente com a propriedade unique no entity Situation.
+        //Voltando a validação manual de duplicidade, pois é o que consta na aula 12.
         const existingSituation = await situationRepository.findOne({
-            where: { nameSituation }
+            where: { nameSituation: data.nameSituation }
         });
 
         if (existingSituation) {
@@ -241,8 +264,7 @@ router.post("/situations", async (req: Request, res: Response) => {
                 message: "Já existe uma situação com esse nome! Atualize-a com o método PUT ou escolha outro nome para a nova situação."
             });
             return;
-        }*/
-
+        }
 
         const newSituation = situationRepository.create(data);
 
