@@ -4,9 +4,14 @@ import express from "express";
 import dotenv from "dotenv";
 dotenv.config();
 
+
+import cors from 'cors';
+
 const app = express();
 
 app.use(express.json());
+
+app.use(cors());
 
 import AuthController from "./controllers/AuthController";
 import SituationsController from "./controllers/SituationsController";
@@ -14,6 +19,7 @@ import ProductCategoryController from "./controllers/ProductCategoryController";
 import ProductSituationController from "./controllers/ProductSituationController";
 import UsersController from "./controllers/UsersController";
 import ProductController from "./controllers/ProductController";
+import TestConnectionController from "./controllers/TestConnectionController";
 
 
 import { AppDataSource } from "./data-source";
@@ -24,6 +30,7 @@ app.use("/", SituationsController);
 app.use("/", ProductSituationController);
 app.use("/", UsersController);
 app.use("/", ProductController);
+app.use("/", TestConnectionController);
 
 app.listen(process.env.PORT, () => {
     console.log(`Acesse: http://localhost:${process.env.PORT}`);
