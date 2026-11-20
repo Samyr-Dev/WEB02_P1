@@ -3,6 +3,8 @@ import { AppDataSource } from "../data-source";
 import { Users } from "../entity/Users";
 import { Situation } from "../entity/Situation";
 import { PaginationService } from "../services/PaginationServices";
+import * as yup from 'yup';
+import { Not } from "typeorm";
 
 const router = express.Router();
 
@@ -19,10 +21,9 @@ router.get("/users", async (req: Request, res: Response) => {
         res.status(200).json(result);
         return;
     }
-    catch (error: any) {
-        res.status(400).json({
-            error: true,
-            message: error.message || "Erro ao buscar usuários!"
+    catch (error) {
+        res.status(500).json({
+            message: "Erro ao buscar usuários!"
         });
         return;
     }
@@ -34,11 +35,13 @@ router.get("/users/:id", async (req: Request, res: Response) => {
         const { id } = req.params;
 
         const userRepository = AppDataSource.getRepository(Users);
-        const user = await userRepository.findOne({
-            where: { id: Number(id) },
-            relations: {
-                situation: true
-            }
+        const user = await userRepository.findOneBy({
+            // where: {
+            id: Number(id)
+            // }, 
+            // relations: {
+            //     situation: true
+            // }
         });
 
         if (!user) {
@@ -48,6 +51,7 @@ router.get("/users/:id", async (req: Request, res: Response) => {
             return;
         }
         res.status(200).json(user);
+        return;
     }
     catch (error) {
         res.status(500).json({
@@ -59,54 +63,91 @@ router.get("/users/:id", async (req: Request, res: Response) => {
 // Criar novo usuário
 router.post("/users", async (req: Request, res: Response) => {
     try {
-        const { name, email, situationId } = req.body;
 
-        if (!name || name.trim() === "") {
-            res.status(400).json({ message: "O campo 'name' é obrigatório!" });
-            return;
-        }
+        var data = req.body;
 
-        if (!email || email.trim() === "") {
-            res.status(400).json({ message: "O campo 'email' é obrigatório!" });
-            return;
-        }
+        const schema = yup.object().shape({
+            name: yup.string().required("O campo 'name' é obrigatório!").min(3, "O campo 'name' deve ter no mínimo 3 caracteres!"),
+            email: yup.string().email("O campo 'email' deve ser um e-mail válido!").required("O campo 'email' é obrigatório!"),
+            situationId: yup.number().required("O campo 'situationId' é obrigatório!")
+        });
 
-        if (!situationId) {
-            res.status(400).json({ message: "O campo 'situationId' é obrigatório!" });
-            return;
-        }
+        await schema.validate(data, { abortEarly: false });
+
+        // const { name, email, situationId } = req.body;
+
+        // if (!name || name.trim() === "") {
+        //     res.status(400).json({ message: "O campo 'name' é obrigatório!" });
+        //     return;
+        // }
+
+        // if (!email || email.trim() === "") {
+        //     res.status(400).json({ message: "O campo 'email' é obrigatório!" });
+        //     return;
+        // }
+
+        // if (!situationId) {
+        //     res.status(400).json({ message: "O campo 'situationId' é obrigatório!" });
+        //     return;
+        // }
 
         const userRepository = AppDataSource.getRepository(Users);
-        const situationRepository = AppDataSource.getRepository(Situation);
 
-        // Verificar se a situação informada existe
-        const situationExists = await situationRepository.findOne({ where: { id: Number(situationId) } });
-        if (!situationExists) {
-            res.status(400).json({ message: "A situação informada não existe!" });
-            return;
-        }
+        const existingUser = await userRepository.findOne({ where: { email: data.email } });
 
-        // Verificar se o e-mail já está cadastrado
-        const existingUser = await userRepository.findOne({ where: { email } });
         if (existingUser) {
             res.status(400).json({ message: "Já existe um usuário cadastrado com esse e-mail! Atualize-o com o método PUT ou escolha outro e-mail." });
             return;
         }
 
-        const newUser = userRepository.create({
-            name,
-            email,
-            situation: situationExists
-        });
+        // const situationRepository = AppDataSource.getRepository(Situation);
+
+        // const newUser = userRepository.create(data);
+
+        // Verificar se a situação informada existe
+        // const situationExists = await situationRepository.findOne({ where: { id: Number(situationId) } });
+        // if (!situationExists) {
+        //     res.status(400).json({ message: "A situação informada não existe!" });
+        //     return;
+        // }
+
+        // Verificar se o e-mail já está cadastrado
+        // const existingUser = await userRepository.findOne({ where: { email } });
+        // if (existingUser) {
+        //     res.status(400).json({ message: "Já existe um usuário cadastrado com esse e-mail! Atualize-o com o método PUT ou escolha outro e-mail." });
+        //     return;
+        // }
+
+        // const newUser = userRepository.create({
+        //     name,
+        //     email,
+        //     situation: situationExists
+        // });
+
+        const newUser = userRepository.create(
+            {
+                name: data.name,
+                email: data.email,
+                situation: { id: data.situationId } // Assumindo que a situação já existe e você está apenas vinculando pelo ID
+            }
+        );
 
         await userRepository.save(newUser);
 
         res.status(201).json({
             message: "Usuário cadastrado com sucesso!",
-            user: newUser
+            situation: newUser
         });
     }
     catch (error) {
+
+        if (error instanceof yup.ValidationError) {
+            res.status(400).json({
+                message: error.errors
+            });
+            return;
+        }
+
         res.status(500).json({
             message: "Erro ao cadastrar usuário!"
         });
@@ -117,36 +158,64 @@ router.post("/users", async (req: Request, res: Response) => {
 router.put("/users/:id", async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
-        const { name, email, situationId } = req.body;
+        const data = req.body;
+
+        // const { name, email, situationId } = req.body;
+
+        const schema = yup.object().shape({
+            name: yup.string().required("O campo 'name' é obrigatório!").min(3, "O campo 'name' deve ter no mínimo 3 caracteres!"),
+            email: yup.string().email("O campo 'email' deve ser um e-mail válido!").required("O campo 'email' é obrigatório!"),
+            situationId: yup.number().required("O campo 'situationId' é obrigatório!")
+        });
+
+        await schema.validate(data, { abortEarly: false });
 
         const userRepository = AppDataSource.getRepository(Users);
-        const user = await userRepository.findOne({ where: { id: Number(id) } });
+        const user = await userRepository.findOneBy({ id: Number(id) });
 
         if (!user) {
             res.status(404).json({ message: "Usuário não encontrado!" });
             return;
         }
 
-        if (email) {
-            const existingEmail = await userRepository.findOne({ where: { email } });
-            if (existingEmail && existingEmail.id !== Number(id)) {
-                res.status(400).json({ message: "Já existe outro usuário cadastrado com esse e-mail!" });
-                return;
+        // if (email) {
+        //     const existingEmail = await userRepository.findOne({ where: { email } });
+        //     if (existingEmail && existingEmail.id !== Number(id)) {
+        //         res.status(400).json({ message: "Já existe outro usuário cadastrado com esse e-mail!" });
+        //         return;
+        //     }
+        // }
+
+        // if (situationId) {
+        //     const situationRepository = AppDataSource.getRepository(Situation);
+        //     const situationExists = await situationRepository.findOne({ where: { id: Number(situationId) } });
+        //     if (!situationExists) {
+        //         res.status(400).json({ message: "A situação informada não existe!" });
+        //         return;
+        //     }
+        //     user.situation = situationExists;
+        // }
+
+        // if (name) user.name = name;
+        // if (email) user.email = email;
+
+        const existingUser = await userRepository.findOne({
+            where: {
+                email: data.email,
+                id: Not(Number(id))
             }
+        });
+
+        if (existingUser) {
+            res.status(400).json({ message: "Já existe outro usuário cadastrado com esse e-mail!" });
+            return;
         }
 
-        if (situationId) {
-            const situationRepository = AppDataSource.getRepository(Situation);
-            const situationExists = await situationRepository.findOne({ where: { id: Number(situationId) } });
-            if (!situationExists) {
-                res.status(400).json({ message: "A situação informada não existe!" });
-                return;
-            }
-            user.situation = situationExists;
-        }
-
-        if (name) user.name = name;
-        if (email) user.email = email;
+        userRepository.merge(user, {
+            name: data.name,
+            email: data.email,
+            situation: { id: Number(data.situationId) }
+        });
 
         const updatedUser = await userRepository.save(user);
 
@@ -156,6 +225,13 @@ router.put("/users/:id", async (req: Request, res: Response) => {
         });
     }
     catch (error) {
+
+        if (error instanceof yup.ValidationError) {
+            res.status(400).json({
+                message: error.errors
+            });
+            return;
+        }
         res.status(500).json({
             message: "Erro ao atualizar usuário!"
         });
@@ -168,7 +244,7 @@ router.delete("/users/:id", async (req: Request, res: Response) => {
         const { id } = req.params;
 
         const userRepository = AppDataSource.getRepository(Users);
-        const user = await userRepository.findOne({ where: { id: Number(id) } });
+        const user = await userRepository.findOneBy({ id: Number(id) });
 
         if (!user) {
             res.status(404).json({ message: "Usuário não encontrado!" });
