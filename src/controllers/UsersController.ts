@@ -5,6 +5,7 @@ import { Situation } from "../entity/Situation";
 import { PaginationService } from "../services/PaginationServices";
 import * as yup from 'yup';
 import { Not } from "typeorm";
+import bcrypt from "bcryptjs";
 
 const router = express.Router();
 
@@ -125,13 +126,9 @@ router.post("/users", async (req: Request, res: Response) => {
         //     situation: situationExists
         // });
 
-        const newUser = userRepository.create(
-            {
-                name: data.name,
-                email: data.email,
-                situation: { id: data.situationId } // Assumindo que a situação já existe e você está apenas vinculando pelo ID
-            }
-        );
+        data.password = await bcrypt.hash(data.password, 10);
+
+        const newUser = userRepository.create(data);
 
         await userRepository.save(newUser);
 
@@ -238,6 +235,51 @@ router.put("/users/:id", async (req: Request, res: Response) => {
         });
     }
 });
+
+router.put("/users-password/:id/", async (req: Request, res: Response) => {
+    try {
+        const { id } = req.params;
+        const data = req.body;
+
+        const schema = yup.object().shape({
+            password: yup.string().required("O campo 'password' é obrigatório!").min(6, "O campo 'password' deve ter no mínimo 6 caracteres!")
+        });
+
+        await schema.validate(data, { abortEarly: false });
+
+        const userRepository = AppDataSource.getRepository(Users);
+        const user = await userRepository.findOneBy({ id: Number(id) });
+
+        if (!user) {
+            res.status(404).json({ message: "Usuário não encontrado!" });
+            return;
+        }
+
+        data.password = await bcrypt.hash(data.password, 10);
+
+        userRepository.merge(user, data);
+
+        const updatedUser = await userRepository.save(user);
+
+        res.status(200).json({
+            message: "Senha atualizada com sucesso!",
+            user: updatedUser
+        });
+    }
+    catch (error) {
+
+        if (error instanceof yup.ValidationError) {
+            res.status(400).json({
+                message: error.errors
+            });
+            return;
+        }
+        res.status(500).json({
+            message: "Erro ao atualizar senha do usuário!"
+        });
+    }
+});
+
 
 // Remover usuário
 router.delete("/users/:id", async (req: Request, res: Response) => {
