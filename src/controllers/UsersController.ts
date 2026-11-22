@@ -69,6 +69,7 @@ router.post("/users", async (req: Request, res: Response) => {
         const schema = yup.object().shape({
             name: yup.string().required("O campo 'name' é obrigatório!").min(3, "O campo 'name' deve ter no mínimo 3 caracteres!"),
             email: yup.string().email("O campo 'email' deve ser um e-mail válido!").required("O campo 'email' é obrigatório!"),
+            password: yup.string().required("O campo 'password' é obrigatório!").min(6, "O campo 'password' deve ter no mínimo 6 caracteres!"),
             situationId: yup.number().required("O campo 'situationId' é obrigatório!")
         });
 

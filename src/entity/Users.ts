@@ -12,6 +12,9 @@ export class Users {
     @Column({ unique: true })
     email!: string;
 
+    @Column()
+    password!: string;
+
     @ManyToOne(() => Situation, (situation) => situation)
     @JoinColumn({ name: "situationId" })
     situation!: Situation;

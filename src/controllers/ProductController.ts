@@ -4,6 +4,10 @@ import { Product } from "../entity/Product";
 import { ProductCategory } from "../entity/ProductCategory";
 import { ProductSituation } from "../entity/ProductSituation";
 import { PaginationService } from "../services/PaginationServices";
+import * as yup from 'yup';
+import slugify from "slugify";
+import { Not } from "typeorm";
+
 
 const router = express.Router();
 
@@ -55,62 +59,117 @@ router.get("/products/:id", async (req: Request, res: Response) => {
 // Cadastrar novo produto
 router.post("/products", async (req: Request, res: Response) => {
     try {
-        const { nameProduct, description, price, productCategoryId, productSituationId } = req.body;
+        var data = req.body;
 
-        if (!nameProduct || nameProduct.trim() === "") {
-            res.status(400).json({ message: "O campo 'nameProduct' é obrigatório!" });
-            return;
-        }
+        const schema = yup.object().shape({
+            nameProduct: yup
+            .string()
+            .required("O campo 'nameProduct' é obrigatório!")
+            .min(3, "O campo 'nameProduct' deve ter no mínimo 3 caracteres!")
+            .max(255, "O campo 'nameProduct' deve ter no máximo 255 caracteres!"),
 
-        if (price === undefined || price === null) {
-            res.status(400).json({ message: "O campo 'price' é obrigatório!" });
-            return;
-        }
+            slug: yup
+            .string()
+            .required("O campo 'slug' é obrigatório!")
+            .min(3, "O campo 'slug' deve ter no mínimo 3 caracteres!")
+            .max(255, "O campo 'slug' deve ter no máximo 255 caracteres!"),
 
-        if (!productCategoryId) {
-            res.status(400).json({ message: "O campo 'productCategoryId' é obrigatório!" });
-            return;
-        }
+            description: yup
+            .string()
+            .required("O campo 'description' é obrigatório!")
+            .min(10, "O campo 'description' deve ter no mínimo 10 caracteres!"),
 
-        if (!productSituationId) {
-            res.status(400).json({ message: "O campo 'productSituationId' é obrigatório!" });
-            return;
-        }
+            price: yup
+            .number()
+            .typeError("O campo 'price' deve ser um número!")
+            .required("O campo 'price' é obrigatório!")
+            .positive("O campo 'price' deve ser um número positivo!")
+            .test(
+                "is-decimal", 
+                "O campo 'price' deve ter no máximo 2 casas decimais!", 
+                (value) => /^\d+(\.\d{1,2})?$/.test(value?.toString() || "")
+            ),
+
+            situationId: yup
+            .number()
+            .typeError("O campo 'situationId' deve ser um número!")
+            .required("O campo 'situationId' é obrigatório!")
+            .integer("O campo 'situationId' deve ser um número inteiro!")
+            .positive("O campo 'situationId' deve ser um número positivo!"),
+
+            categoryId: yup
+            .number()
+            .typeError("O campo 'categoryId' deve ser um número!")
+            .required("O campo 'categoryId' é obrigatório!")
+            .integer("O campo 'categoryId' deve ser um número inteiro!")
+            .positive("O campo 'categoryId' deve ser um número positivo!"),
+        });
+
+
+
+
+        // const { nameProduct, description, price, productCategoryId, productSituationId } = req.body;
+
+        // if (!nameProduct || nameProduct.trim() === "") {
+        //     res.status(400).json({ message: "O campo 'nameProduct' é obrigatório!" });
+        //     return;
+        // }
+
+        // if (price === undefined || price === null) {
+        //     res.status(400).json({ message: "O campo 'price' é obrigatório!" });
+        //     return;
+        // }
+
+        // if (!productCategoryId) {
+        //     res.status(400).json({ message: "O campo 'productCategoryId' é obrigatório!" });
+        //     return;
+        // }
+
+        // if (!productSituationId) {
+        //     res.status(400).json({ message: "O campo 'productSituationId' é obrigatório!" });
+        //     return;
+        // }
+
+        await schema.validate(data, { abortEarly: false });
+
+        data.slug = slugify(data.nameProduct, { lower: true, strict: true });
 
         const productRepo = AppDataSource.getRepository(Product);
         const categoryRepo = AppDataSource.getRepository(ProductCategory);
         const situationRepo = AppDataSource.getRepository(ProductSituation);
 
         // Validar se a categoria existe
-        const categoryExists = await categoryRepo.findOne({ where: { id: Number(productCategoryId) } });
+        const categoryExists = await categoryRepo.findOne({ where: { id: Number(data.productCategoryId) } });
         if (!categoryExists) {
             res.status(400).json({ message: "A categoria de produto informada não existe!" });
             return;
         }
 
         // Validar se a situação do produto existe
-        const situationExists = await situationRepo.findOne({ where: { id: Number(productSituationId) } });
+        const situationExists = await situationRepo.findOne({ where: { id: Number(data.productSituationId) } });
         if (!situationExists) {
             res.status(400).json({ message: "A situação de produto informada não existe!" });
             return;
         }
 
         // Verificar se já existe produto com esse nome
-        const existingProduct = await productRepo.findOne({ where: { nameProduct } });
+        // const existingProduct = await productRepo.findOne({ where: { nameProduct } });
+        // if (existingProduct) {
+        //     res.status(400).json({
+        //         message: "Já existe um produto com esse nome! Atualize-o com o método PUT ou escolha outro nome para o novo produto."
+        //     });
+        //     return;
+        // }
+
+        const existingProduct = await productRepo.findOne({ where: { slug: data.slug } });
         if (existingProduct) {
             res.status(400).json({
-                message: "Já existe um produto com esse nome! Atualize-o com o método PUT ou escolha outro nome para o novo produto."
+                message: "Já existe um produto com esse slug! Atualize-o com o método PUT ou escolha outro nome para o novo produto."
             });
             return;
         }
 
-        const newProduct = productRepo.create({
-            nameProduct,
-            description,
-            price,
-            productCategory: categoryExists,
-            productSituation: situationExists
-        });
+        const newProduct = productRepo.create(data);
 
         await productRepo.save(newProduct);
 
@@ -119,6 +178,13 @@ router.post("/products", async (req: Request, res: Response) => {
             product: newProduct
         });
     } catch (error) {
+        if (error instanceof yup.ValidationError) {
+            res.status(400).json({
+                message: error.errors
+            });
+            return;
+        }
+                
         res.status(500).json({ message: "Erro ao cadastrar produto!" });
     }
 });
@@ -127,7 +193,58 @@ router.post("/products", async (req: Request, res: Response) => {
 router.put("/products/:id", async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
-        const { nameProduct, description, price, productCategoryId, productSituationId } = req.body;
+
+        const data = req.body;
+        // const { nameProduct, description, price, productCategoryId, productSituationId } = req.body;
+
+        const schema = yup.object().shape({
+
+            nameProduct: yup
+            .string()
+            .required("O campo 'nameProduct' é obrigatório!")
+            .min(3, "O campo 'nameProduct' deve ter no mínimo 3 caracteres!")
+            .max(255, "O campo 'nameProduct' deve ter no máximo 255 caracteres!"),
+
+
+            slug: yup
+            .string()
+            .required("O campo 'slug' é obrigatório!")
+            .min(3, "O campo 'slug' deve ter no mínimo 3 caracteres!")
+            .max(255, "O campo 'slug' deve ter no máximo 255 caracteres!"),
+
+            description: yup
+            .string()
+            .required("O campo 'description' é obrigatório!")
+            .min(10, "O campo 'description' deve ter no mínimo 10 caracteres!"),
+
+            price: yup
+            .number()
+            .typeError("O campo 'price' deve ser um número!")
+            .required("O campo 'price' é obrigatório!")
+            .positive("O campo 'price' deve ser um número positivo!")
+            .test(
+                "is-decimal", 
+                "O campo 'price' deve ter no máximo 2 casas decimais!", 
+                (value) => /^\d+(\.\d{1,2})?$/.test(value?.toString() || "")
+            ),
+
+            situationId: yup
+            .number()
+            .typeError("O campo 'situationId' deve ser um número!")
+            .required("O campo 'situationId' é obrigatório!")
+            .integer("O campo 'situationId' deve ser um número inteiro!")
+            .positive("O campo 'situationId' deve ser um número positivo!"),
+
+            categoryId: yup
+            .number()
+            .typeError("O campo 'categoryId' deve ser um número!")
+            .required("O campo 'categoryId' é obrigatório!")
+            .integer("O campo 'categoryId' deve ser um número inteiro!")
+            .positive("O campo 'categoryId' deve ser um número positivo!"),
+        });
+
+        await schema.validate(data, { abortEarly: false });
+
 
         const productRepo = AppDataSource.getRepository(Product);
         const product = await productRepo.findOne({ where: { id: Number(id) } });
@@ -137,39 +254,57 @@ router.put("/products/:id", async (req: Request, res: Response) => {
             return;
         }
 
-        if (nameProduct) {
-            const existingName = await productRepo.findOne({ where: { nameProduct } });
-            if (existingName && existingName.id !== Number(id)) {
-                res.status(400).json({
-                    message: "Já existe outro produto com esse nome! Escolha outro nome."
-                });
-                return;
+        data.slug = slugify(data.nameProduct, { lower: true, strict: true });
+
+        // if (data.nameProduct) {
+        //     const existingName = await productRepo.findOne({ where: { nameProduct } });
+        //     if (existingName && existingName.id !== Number(id)) {
+        //         res.status(400).json({
+        //             message: "Já existe outro produto com esse nome! Escolha outro nome."
+        //         });
+        //         return;
+        //     }
+        //     product.nameProduct = nameProduct;
+        // }
+
+        // if (description !== undefined) product.description = description;
+        // if (price !== undefined) product.price = price;
+
+        // if (productCategoryId) {
+        //     const categoryRepo = AppDataSource.getRepository(ProductCategory);
+        //     const categoryExists = await categoryRepo.findOne({ where: { id: Number(productCategoryId) } });
+        //     if (!categoryExists) {
+        //         res.status(400).json({ message: "A categoria informada não existe!" });
+        //         return;
+        //     }
+        //     product.productCategory = categoryExists;
+        // }
+
+        // if (productSituationId) {
+        //     const situationRepo = AppDataSource.getRepository(ProductSituation);
+        //     const situationExists = await situationRepo.findOne({ where: { id: Number(productSituationId) } });
+        //     if (!situationExists) {
+        //         res.status(400).json({ message: "A situação informada não existe!" });
+        //         return;
+        //     }
+        //     product.productSituation = situationExists;
+        // }
+
+        const existingProduct = await productRepo.findOne({
+            where: {
+                slug: data.slug,
+                id: Not(Number(id))
             }
-            product.nameProduct = nameProduct;
+        });
+
+        if (existingProduct) {
+            res.status(400).json({
+                message: "Já existe outro produto com esse slug! Escolha outro nome."
+            });
+            return;
         }
 
-        if (description !== undefined) product.description = description;
-        if (price !== undefined) product.price = price;
-
-        if (productCategoryId) {
-            const categoryRepo = AppDataSource.getRepository(ProductCategory);
-            const categoryExists = await categoryRepo.findOne({ where: { id: Number(productCategoryId) } });
-            if (!categoryExists) {
-                res.status(400).json({ message: "A categoria informada não existe!" });
-                return;
-            }
-            product.productCategory = categoryExists;
-        }
-
-        if (productSituationId) {
-            const situationRepo = AppDataSource.getRepository(ProductSituation);
-            const situationExists = await situationRepo.findOne({ where: { id: Number(productSituationId) } });
-            if (!situationExists) {
-                res.status(400).json({ message: "A situação informada não existe!" });
-                return;
-            }
-            product.productSituation = situationExists;
-        }
+        productRepo.merge(product, data);
 
         const updatedProduct = await productRepo.save(product);
 
@@ -178,7 +313,14 @@ router.put("/products/:id", async (req: Request, res: Response) => {
             product: updatedProduct
         });
     } catch (error) {
-        res.status(500).json({ message: "Erro ao atualizar produto!" });
+        if (error instanceof yup.ValidationError) {
+            res.status(400).json({
+                message: error.errors
+            });
+            return;
+        } 
+            res.status(500).json({ message: "Erro ao atualizar produto!" });
+        
     }
 });
 

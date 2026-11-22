@@ -10,6 +10,9 @@ export class Product {
     @Column({ type: "varchar", length: 255 })
     nameProduct!: string;
 
+    @Column({ unique: true })
+    slug!: string;
+
     @Column({ type: "text", nullable: true })
     description!: string;
 
