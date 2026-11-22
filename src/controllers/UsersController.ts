@@ -6,11 +6,12 @@ import { PaginationService } from "../services/PaginationServices";
 import * as yup from 'yup';
 import { Not } from "typeorm";
 import bcrypt from "bcryptjs";
+import {verifyToken} from "../middlewares/authMiddleware";
 
 const router = express.Router();
 
 // Buscar lista de todos os usuários cadastrados com paginação
-router.get("/users", async (req: Request, res: Response) => {
+router.get("/users", verifyToken, async (req: Request, res: Response) => {
     try {
         const userRepository = AppDataSource.getRepository(Users);
 
@@ -31,7 +32,7 @@ router.get("/users", async (req: Request, res: Response) => {
 });
 
 // Buscar usuário por ID (trazendo os dados da situação vinculada)
-router.get("/users/:id", async (req: Request, res: Response) => {
+router.get("/users/:id", verifyToken, async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
 
@@ -62,7 +63,7 @@ router.get("/users/:id", async (req: Request, res: Response) => {
 });
 
 // Criar novo usuário
-router.post("/users", async (req: Request, res: Response) => {
+router.post("/users", verifyToken, async (req: Request, res: Response) => {
     try {
 
         var data = req.body;
@@ -153,7 +154,7 @@ router.post("/users", async (req: Request, res: Response) => {
 });
 
 // Atualizar usuário
-router.put("/users/:id", async (req: Request, res: Response) => {
+router.put("/users/:id", verifyToken, async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
         const data = req.body;
@@ -236,7 +237,7 @@ router.put("/users/:id", async (req: Request, res: Response) => {
     }
 });
 
-router.put("/users-password/:id/", async (req: Request, res: Response) => {
+router.put("/users-password/:id/", verifyToken, async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
         const data = req.body;
@@ -282,7 +283,7 @@ router.put("/users-password/:id/", async (req: Request, res: Response) => {
 
 
 // Remover usuário
-router.delete("/users/:id", async (req: Request, res: Response) => {
+router.delete("/users/:id", verifyToken, async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
 
