@@ -127,7 +127,7 @@ router.post("/users", verifyToken, async (req: Request, res: Response) => {
         //     situation: situationExists
         // });
 
-        data.password = await bcrypt.hash(data.password, 10);
+        //data.password = await bcrypt.hash(data.password, 10);
 
         const newUser = userRepository.create(data);
 
@@ -256,7 +256,7 @@ router.put("/users-password/:id/", verifyToken, async (req: Request, res: Respon
             return;
         }
 
-        data.password = await bcrypt.hash(data.password, 10);
+        //data.password = await bcrypt.hash(data.password, 10);
 
         userRepository.merge(user, data);
 

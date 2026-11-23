@@ -87,7 +87,7 @@ router.post("/recover-password", async (req: Request, res: Response) => {
             from: process.env.EMAIL_FROM, // sender address
             to: data.email, // list of recipients
             subject: "Recuperar senha", // subject line
-            
+
             text: `Prezado(a) ${user.name}\n\n
             Informamos que a sua solicitação de alteração de senha foi recebida com sucesso.\n\n
             Clique ou copie o link para criar uma nova senha em nosso sistema:
@@ -133,6 +133,112 @@ router.post("/recover-password", async (req: Request, res: Response) => {
     // }
 
     catch (error: any) {
+        if (error instanceof yup.ValidationError) {
+            res.status(400).json({
+                message: error.errors
+            });
+            return;
+        }
+
+        res.status(500).json({
+            message: "Erro ao recuperar senha"
+        });
+    }
+});
+
+router.post("/validate-recover-password", async (req: Request, res: Response) => {
+
+    try {
+
+        var data = req.body;
+
+        const schema = yup.object().shape({
+            recoverPassword: yup.string().required("O campo 'recoverPassword' é obrigatório"),
+            email: yup.string().email("Email inválido").required("O campo 'email' é obrigatório"),
+        });
+
+        await schema.validate(data, { abortEarly: false });
+
+        const userRepository = AppDataSource.getRepository(Users);
+
+        const user = await userRepository.findOneBy({
+
+            email: data.email,
+            recoverPassword: data.recoverPassword
+
+        });
+
+        if (!user) {
+            res.status(404).json({
+                message: "A chave de recuperação de senha é inválida"
+            });
+            return;
+        }
+
+        res.status(200).json({
+            message: "A chave de recuperar a senha é válida",
+        });
+        return;
+
+    }
+    catch (error: any) {
+        if (error instanceof yup.ValidationError) {
+            res.status(400).json({
+                message: error.errors
+            });
+            return;
+        }
+
+        res.status(500).json({
+            message: "Erro ao recuperar senha"
+        });
+    }
+});
+
+router.put("/update-password", async (req: Request, res: Response) => {
+
+    try {
+
+        var data = req.body;
+
+        const schema = yup.object().shape({
+            recoverPassword: yup.string().required("O campo 'recoverPassword' é obrigatório"),
+            password: yup.string().required("O campo 'password' é obrigatório!").min(6, "O campo 'password' deve ter no mínimo 6 caracteres!"),
+            email: yup.string().email("Email inválido").required("O campo 'email' é obrigatório"),
+        });
+
+        await schema.validate(data, { abortEarly: false });
+
+        const userRepository = AppDataSource.getRepository(Users);
+
+        const user = await userRepository.findOneBy({
+
+            email: data.email,
+            recoverPassword: data.recoverPassword
+
+        });
+
+        if (!user) {
+            res.status(404).json({
+                message: "A chave de recuperação de senha é inválida"
+            });
+            return;
+        }
+
+
+        data.recoverPassword = null
+
+        userRepository.merge(user, data)
+
+        await userRepository.save(user);
+
+        res.status(200).json({
+            message: "Senha atualizada com sucesso"
+        });
+        return;
+
+
+    } catch (error: any) {
         if (error instanceof yup.ValidationError) {
             res.status(400).json({
                 message: error.errors
