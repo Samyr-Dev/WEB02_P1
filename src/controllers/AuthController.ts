@@ -5,6 +5,7 @@ import { AppDataSource } from "../data-source";
 import { Users } from "../entity/Users";
 import crypto from "crypto";
 import nodemailer from "nodemailer";
+import { verifyToken } from "../middlewares/authMiddleware";
 
 const router = express.Router();
 
@@ -39,6 +40,104 @@ router.post("/", async (req: Request, res: Response) => {
     }
 });
 
+router.get("/validate-token", verifyToken, async (req: Request, res: Response) => {
+
+    res.status(200).json({
+        message: "Token válido",
+        userId: (req as any).user.id
+    })
+
+})
+
+router.post("/new-user", verifyToken, async (req: Request, res: Response) => {
+    try {
+
+        var data = req.body;
+
+        const schema = yup.object().shape({
+            name: yup.string().required("O campo 'name' é obrigatório!").min(3, "O campo 'name' deve ter no mínimo 3 caracteres!"),
+            email: yup.string().email("O campo 'email' deve ser um e-mail válido!").required("O campo 'email' é obrigatório!"),
+            password: yup.string().required("O campo 'password' é obrigatório!").min(6, "O campo 'password' deve ter no mínimo 6 caracteres!"),
+            situationId: yup.number().required("O campo 'situationId' é obrigatório!")
+        });
+
+        await schema.validate(data, { abortEarly: false });
+
+        // const { name, email, situationId } = req.body;
+
+        // if (!name || name.trim() === "") {
+        //     res.status(400).json({ message: "O campo 'name' é obrigatório!" });
+        //     return;
+        // }
+
+        // if (!email || email.trim() === "") {
+        //     res.status(400).json({ message: "O campo 'email' é obrigatório!" });
+        //     return;
+        // }
+
+        // if (!situationId) {
+        //     res.status(400).json({ message: "O campo 'situationId' é obrigatório!" });
+        //     return;
+        // }
+
+        const userRepository = AppDataSource.getRepository(Users);
+
+        const existingUser = await userRepository.findOne({ where: { email: data.email } });
+
+        if (existingUser) {
+            res.status(400).json({ message: "Já existe um usuário cadastrado com esse e-mail! Escolha outro e-mail ou faça login com o e-mail já cadastrado." });
+            return;
+        }
+
+        // const situationRepository = AppDataSource.getRepository(Situation);
+
+        // const newUser = userRepository.create(data);
+
+        // Verificar se a situação informada existe
+        // const situationExists = await situationRepository.findOne({ where: { id: Number(situationId) } });
+        // if (!situationExists) {
+        //     res.status(400).json({ message: "A situação informada não existe!" });
+        //     return;
+        // }
+
+        // Verificar se o e-mail já está cadastrado
+        // const existingUser = await userRepository.findOne({ where: { email } });
+        // if (existingUser) {
+        //     res.status(400).json({ message: "Já existe um usuário cadastrado com esse e-mail! Atualize-o com o método PUT ou escolha outro e-mail." });
+        //     return;
+        // }
+
+        // const newUser = userRepository.create({
+        //     name,
+        //     email,
+        //     situation: situationExists
+        // });
+
+        //data.password = await bcrypt.hash(data.password, 10);
+
+        const newUser = userRepository.create(data);
+
+        await userRepository.save(newUser);
+
+        res.status(201).json({
+            message: "Usuário cadastrado com sucesso!",
+            situation: newUser
+        });
+    }
+    catch (error) {
+
+        if (error instanceof yup.ValidationError) {
+            res.status(400).json({
+                message: error.errors
+            });
+            return;
+        }
+
+        res.status(500).json({
+            message: "Erro ao cadastrar usuário!"
+        });
+    }
+});
 
 router.post("/recover-password", async (req: Request, res: Response) => {
 
