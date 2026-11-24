@@ -1,6 +1,7 @@
 import express, { Request, Response } from "express";
 import { AppDataSource } from "../data-source";
 import { Product } from "../entity/Product";
+import { Situation } from "../entity/Situation";
 import { ProductCategory } from "../entity/ProductCategory";
 import { ProductSituation } from "../entity/ProductSituation";
 import { PaginationService } from "../services/PaginationServices";
@@ -18,7 +19,7 @@ router.get("/products", async (req: Request, res: Response) => {
         const page = Number(req.query.page) || 1;
         const limit = Number(req.query.limit) || 5;
 
-        const result = await PaginationService.paginate(productRepository, page, limit, { id: "DESC" });
+        const result = await PaginationService.paginate(productRepository, page, limit, { id: "DESC" }, {productCategory: true, productSituation: true});
 
         res.status(200).json(result);
         return;
@@ -90,19 +91,19 @@ router.post("/products", async (req: Request, res: Response) => {
                 (value) => /^\d+(\.\d{1,2})?$/.test(value?.toString() || "")
             ),
 
-            situationId: yup
+            productSituationId: yup
             .number()
-            .typeError("O campo 'situationId' deve ser um número!")
-            .required("O campo 'situationId' é obrigatório!")
-            .integer("O campo 'situationId' deve ser um número inteiro!")
-            .positive("O campo 'situationId' deve ser um número positivo!"),
+            .typeError("O campo 'productSituationId' deve ser um número!")
+            .required("O campo 'productSituationId' é obrigatório!")
+            .integer("O campo 'productSituationId' deve ser um número inteiro!")
+            .positive("O campo 'productSituationId' deve ser um número positivo!"),
 
-            categoryId: yup
+            productCategoryId: yup
             .number()
-            .typeError("O campo 'categoryId' deve ser um número!")
-            .required("O campo 'categoryId' é obrigatório!")
-            .integer("O campo 'categoryId' deve ser um número inteiro!")
-            .positive("O campo 'categoryId' deve ser um número positivo!"),
+            .typeError("O campo 'productCategoryId' deve ser um número!")
+            .required("O campo 'productCategoryId' é obrigatório!")
+            .integer("O campo 'productCategoryId' deve ser um número inteiro!")
+            .positive("O campo 'productCategoryId' deve ser um número positivo!"),
         });
 
 
@@ -169,7 +170,11 @@ router.post("/products", async (req: Request, res: Response) => {
             return;
         }
 
-        const newProduct = productRepo.create(data);
+        const newProduct = productRepo.create({
+            ...data,
+            productCategory: categoryExists,
+            productSituation: situationExists
+        });
 
         await productRepo.save(newProduct);
 
@@ -228,19 +233,19 @@ router.put("/products/:id", async (req: Request, res: Response) => {
                 (value) => /^\d+(\.\d{1,2})?$/.test(value?.toString() || "")
             ),
 
-            situationId: yup
+            productSituationId: yup
             .number()
-            .typeError("O campo 'situationId' deve ser um número!")
-            .required("O campo 'situationId' é obrigatório!")
-            .integer("O campo 'situationId' deve ser um número inteiro!")
-            .positive("O campo 'situationId' deve ser um número positivo!"),
+            .typeError("O campo 'productSituationId' deve ser um número!")
+            .required("O campo 'productSituationId' é obrigatório!")
+            .integer("O campo 'productSituationId' deve ser um número inteiro!")
+            .positive("O campo 'productSituationId' deve ser um número positivo!"),
 
-            categoryId: yup
+            productCategoryId: yup
             .number()
-            .typeError("O campo 'categoryId' deve ser um número!")
-            .required("O campo 'categoryId' é obrigatório!")
-            .integer("O campo 'categoryId' deve ser um número inteiro!")
-            .positive("O campo 'categoryId' deve ser um número positivo!"),
+            .typeError("O campo 'productCategoryId' deve ser um número!")
+            .required("O campo 'productCategoryId' é obrigatório!")
+            .integer("O campo 'productCategoryId' deve ser um número inteiro!")
+            .positive("O campo 'productCategoryId' deve ser um número positivo!"),
         });
 
         await schema.validate(data, { abortEarly: false });
@@ -304,7 +309,11 @@ router.put("/products/:id", async (req: Request, res: Response) => {
             return;
         }
 
-        productRepo.merge(product, data);
+        productRepo.merge(product, {
+            ...data,
+            productCategory: { id: Number(data.productCategoryId) },
+            productSituation: { id: Number(data.productSituationId) }
+        });
 
         const updatedProduct = await productRepo.save(product);
 
