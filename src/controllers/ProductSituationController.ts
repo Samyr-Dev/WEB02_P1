@@ -3,6 +3,7 @@ import { AppDataSource } from "../data-source";
 import { ProductSituation } from "../entity/ProductSituation";
 import { PaginationService } from "../services/PaginationServices";
 import { verifyToken } from "../middlewares/authMiddleware";
+import * as yup from "yup";
 
 const router = express.Router();
 
@@ -55,12 +56,21 @@ router.put("/product-situations/:id", verifyToken, async (req: Request, res: Res
         const { id } = req.params;
         const { nameProductSituations } = req.body;
 
-        if (!nameProductSituations || nameProductSituations.trim() === "") {
-            res.status(400).json({
-                message: "O campo 'nameProductSituations' é obrigatório!"
-            });
-            return;
-        }
+        // if (!nameProductSituations || nameProductSituations.trim() === "") {
+        //     res.status(400).json({
+        //         message: "O campo 'nameProductSituations' é obrigatório!"
+        //     });
+        //     return;
+        // }
+
+        const schema = yup.object().shape({
+            nameProductSituations: yup.string()
+                .trim()
+                .required("O campo 'nameProductSituations' é obrigatório!")
+                .min(3, "O campo 'nameProductSituations' deve ter pelo menos 3 caracteres.")
+        });
+
+        await schema.validate(data, { abortEarly: false });
 
         const repository = AppDataSource.getRepository(ProductSituation);
         const productSituation = await repository.findOne({
@@ -93,6 +103,12 @@ router.put("/product-situations/:id", verifyToken, async (req: Request, res: Res
         });
     }
     catch (error) {
+        if (error instanceof yup.ValidationError) {
+            res.status(400).json({
+                message: error.errors
+            });
+            return;
+        }
         res.status(500).json({
             message: "Erro ao atualizar situação de produto!"
         });
@@ -131,12 +147,21 @@ router.post("/product-situations", verifyToken, async (req: Request, res: Respon
         var data = req.body;
         const { nameProductSituations } = req.body;
 
-        if (!nameProductSituations || nameProductSituations.trim() === "") {
-            res.status(400).json({
-                message: "O campo 'nameProductSituations' é obrigatório!"
-            });
-            return;
-        }
+        // if (!nameProductSituations || nameProductSituations.trim() === "") {
+        //     res.status(400).json({
+        //         message: "O campo 'nameProductSituations' é obrigatório!"
+        //     });
+        //     return;
+        // }
+
+        const schema = yup.object().shape({
+            nameProductSituations: yup.string()
+                .trim()
+                .required("O campo 'nameProductSituations' é obrigatório!")
+                .min(3, "O campo 'nameProductSituations' deve ter pelo menos 3 caracteres.")
+        });
+
+        await schema.validate(data, { abortEarly: false });
 
         const repository = AppDataSource.getRepository(ProductSituation);
         const existing = await repository.findOne({
@@ -159,6 +184,12 @@ router.post("/product-situations", verifyToken, async (req: Request, res: Respon
         });
     }
     catch (error) {
+        if (error instanceof yup.ValidationError) {
+            res.status(400).json({
+                message: error.errors
+            });
+            return;
+        }
         res.status(500).json({
             message: "Erro ao cadastrar situação de produto!"
         });

@@ -3,6 +3,7 @@ import { AppDataSource } from "../data-source";
 import { ProductCategory } from "../entity/ProductCategory";
 import { PaginationService } from "../services/PaginationServices";
 import { verifyToken } from "../middlewares/authMiddleware";
+import * as yup from "yup";
 
 const router = express.Router();
 
@@ -62,12 +63,21 @@ router.put("/product-categories/:id", verifyToken,  async (req: Request, res: Re
         const { id } = req.params;
         const { nameProductCategories } = req.body;
 
-        if (nameProductCategories === "" || nameProductCategories === undefined || nameProductCategories === null || nameProductCategories.trim() === "" || nameProductCategories.length === 0 || !nameProductCategories) {
-            res.status(400).json({
-                message: "O campo 'nameProductCategories' é obrigatório!"
-            });
-            return;
-        }
+        // if (nameProductCategories === "" || nameProductCategories === undefined || nameProductCategories === null || nameProductCategories.trim() === "" || nameProductCategories.length === 0 || !nameProductCategories) {
+        //     res.status(400).json({
+        //         message: "O campo 'nameProductCategories' é obrigatório!"
+        //     });
+        //     return;
+        // }
+
+        const schema = yup.object().shape({
+            nameProductCategories: yup.string()
+                .trim()
+                .required("O campo 'nameProductCategories' é obrigatório!")
+                .min(3, "O campo 'nameProductCategories' deve ter pelo menos 3 caracteres.")
+        });
+
+        await schema.validate(data, { abortEarly: false });
 
         const categoryRepository = AppDataSource.getRepository(ProductCategory);
 
@@ -104,6 +114,12 @@ router.put("/product-categories/:id", verifyToken,  async (req: Request, res: Re
         });
     }
     catch (error) {
+        if (error instanceof yup.ValidationError) {
+            res.status(400).json({
+                message: error.errors
+            });
+            return;
+        }
         res.status(500).json({
             message: "Erro ao atualizar categoria!"
         });
@@ -149,12 +165,21 @@ router.post("/product-categories", verifyToken, async (req: Request, res: Respon
         var data = req.body;
         const { nameProductCategories } = req.body;
 
-        if (nameProductCategories === "" || nameProductCategories === undefined || nameProductCategories === null || nameProductCategories.trim() === "" || nameProductCategories.length === 0 || !nameProductCategories) {
-            res.status(400).json({
-                message: "O campo 'nameProductCategories' é obrigatório!"
-            });
-            return;
-        }
+        // if (nameProductCategories === "" || nameProductCategories === undefined || nameProductCategories === null || nameProductCategories.trim() === "" || nameProductCategories.length === 0 || !nameProductCategories) {
+        //     res.status(400).json({
+        //         message: "O campo 'nameProductCategories' é obrigatório!"
+        //     });
+        //     return;
+        // }
+
+        const schema = yup.object().shape({
+            nameProductCategories: yup.string()
+                .trim()
+                .required("O campo 'nameProductCategories' é obrigatório!")
+                .min(3, "O campo 'nameProductCategories' deve ter pelo menos 3 caracteres.")
+        });
+
+        await schema.validate(data, { abortEarly: false });
 
         const categoryRepository = AppDataSource.getRepository(ProductCategory);
 
@@ -181,6 +206,12 @@ router.post("/product-categories", verifyToken, async (req: Request, res: Respon
         }
     }
     catch (error) {
+        if (error instanceof yup.ValidationError) {
+            res.status(400).json({
+                message: error.errors
+            });
+            return;
+        }
         res.status(500).json({
             message: "Erro ao cadastrar categoria!"
         });

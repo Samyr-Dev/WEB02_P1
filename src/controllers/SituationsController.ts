@@ -104,7 +104,7 @@ router.put("/situations/:id", verifyToken, async (req: Request, res: Response) =
         const schema = yup.object().shape({
             nameSituation: yup.string()
                 .required("O campo 'nameSituation' é obrigatório!")
-                .min(3, "O campo 'nameSituation' deve ter pelo menos 2 caracteres.")
+                .min(3, "O campo 'nameSituation' deve ter pelo menos 3 caracteres.")
         });
 
 
@@ -247,7 +247,7 @@ router.post("/situations", verifyToken, async (req: Request, res: Response) => {
         const schema = yup.object().shape({
             nameSituation: yup.string()
                 .required("O campo 'nameSituation' é obrigatório!")
-                .min(3, "O campo 'nameSituation' deve ter pelo menos 2 caracteres.")
+                .min(3, "O campo 'nameSituation' deve ter pelo menos 3 caracteres.")
         });
 
 
