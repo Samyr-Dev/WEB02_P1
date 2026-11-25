@@ -9,7 +9,7 @@ export class AddSlugToProducts1795347697883 implements MigrationInterface {
             isUnique: true,
             isNullable: false,
         }));
-        await queryRunner.query(`ALTER TABLE products MODIFY COLUMN slug VARCHAR(255) AFTER name`); 
+        await queryRunner.query(`ALTER TABLE products MODIFY COLUMN slug VARCHAR(255) AFTER nameProduct`); 
     }
 
     public async down(queryRunner: QueryRunner): Promise<void> {
