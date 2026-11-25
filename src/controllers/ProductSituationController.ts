@@ -2,10 +2,11 @@ import express, { Request, Response } from "express";
 import { AppDataSource } from "../data-source";
 import { ProductSituation } from "../entity/ProductSituation";
 import { PaginationService } from "../services/PaginationServices";
+import { verifyToken } from "../middlewares/authMiddleware";
 
 const router = express.Router();
 
-router.get("/product-situations", async (req: Request, res: Response) => {
+router.get("/product-situations", verifyToken, async (req: Request, res: Response) => {
     try {
         const repository = AppDataSource.getRepository(ProductSituation);
         const page = Number(req.query.page) || 1;
@@ -25,7 +26,7 @@ router.get("/product-situations", async (req: Request, res: Response) => {
     }
 });
 
-router.get("/product-situations/:id", async (req: Request, res: Response) => {
+router.get("/product-situations/:id", verifyToken, async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
         const repository = AppDataSource.getRepository(ProductSituation);
@@ -48,7 +49,7 @@ router.get("/product-situations/:id", async (req: Request, res: Response) => {
     }
 });
 
-router.put("/product-situations/:id", async (req: Request, res: Response) => {
+router.put("/product-situations/:id", verifyToken, async (req: Request, res: Response) => {
     try {
         var data = req.body;
         const { id } = req.params;
@@ -98,7 +99,7 @@ router.put("/product-situations/:id", async (req: Request, res: Response) => {
     }
 });
 
-router.delete("/product-situations/:id", async (req: Request, res: Response) => {
+router.delete("/product-situations/:id", verifyToken, async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
         const repository = AppDataSource.getRepository(ProductSituation);
@@ -125,7 +126,7 @@ router.delete("/product-situations/:id", async (req: Request, res: Response) => 
     }
 });
 
-router.post("/product-situations", async (req: Request, res: Response) => {
+router.post("/product-situations", verifyToken, async (req: Request, res: Response) => {
     try {
         var data = req.body;
         const { nameProductSituations } = req.body;

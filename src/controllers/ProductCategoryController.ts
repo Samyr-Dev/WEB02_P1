@@ -2,11 +2,12 @@ import express, { Request, Response } from "express";
 import { AppDataSource } from "../data-source";
 import { ProductCategory } from "../entity/ProductCategory";
 import { PaginationService } from "../services/PaginationServices";
+import { verifyToken } from "../middlewares/authMiddleware";
 
 const router = express.Router();
 
 // Buscar lista de todas as categorias cadastradas no banco de dados com paginação
-router.get("/product-categories", async (req: Request, res: Response) => {
+router.get("/product-categories", verifyToken, async (req: Request, res: Response) => {
     try {
         const categoryRepository = AppDataSource.getRepository(ProductCategory);
 
@@ -28,7 +29,7 @@ router.get("/product-categories", async (req: Request, res: Response) => {
 });
 
 // Buscar a visualização do item cadastrado em categoria por ID
-router.get("/product-categories/:id", async (req: Request, res: Response) => {
+router.get("/product-categories/:id", verifyToken, async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
 
@@ -55,7 +56,7 @@ router.get("/product-categories/:id", async (req: Request, res: Response) => {
 });
 
 // Alterar a visualização do item cadastrado em categoria
-router.put("/product-categories/:id", async (req: Request, res: Response) => {
+router.put("/product-categories/:id", verifyToken,  async (req: Request, res: Response) => {
     try {
         var data = req.body;
         const { id } = req.params;
@@ -110,7 +111,7 @@ router.put("/product-categories/:id", async (req: Request, res: Response) => {
 });
 
 // Remover a visualização do item cadastrado em categoria
-router.delete("/product-categories/:id", async (req: Request, res: Response) => {
+router.delete("/product-categories/:id", verifyToken, async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
 
@@ -143,7 +144,7 @@ router.delete("/product-categories/:id", async (req: Request, res: Response) => 
 });
 
 // Criar a categoria cadastrada no banco de dados    
-router.post("/product-categories", async (req: Request, res: Response) => {
+router.post("/product-categories", verifyToken, async (req: Request, res: Response) => {
     try {
         var data = req.body;
         const { nameProductCategories } = req.body;

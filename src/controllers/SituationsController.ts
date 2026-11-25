@@ -5,6 +5,7 @@ import { Situation } from "../entity/Situation";
 import { PaginationService } from "../services/PaginationServices";
 import * as yup from "yup";
 import { Not } from "typeorm";
+import { verifyToken } from "../middlewares/authMiddleware";
 
 
 
@@ -12,7 +13,7 @@ const router = express.Router();
 
 
 //Buscar lista de todas as situações cadastradas no banco de dados
-router.get("/situations", async (req: Request, res: Response) => {
+router.get("/situations", verifyToken, async (req: Request, res: Response) => {
 
     try {
         const situationRepository = AppDataSource.getRepository(Situation);
@@ -43,7 +44,7 @@ router.get("/situations", async (req: Request, res: Response) => {
 
 
 //Buscar a visualização do item cadastrado em situação
-router.get("/situations/:id", async (req: Request, res: Response) => {
+router.get("/situations/:id", verifyToken, async (req: Request, res: Response) => {
     try {
 
         const { id } = req.params;
@@ -74,7 +75,7 @@ router.get("/situations/:id", async (req: Request, res: Response) => {
 
 
 //Alterar a visualização do item cadastrado em situação
-router.put("/situations/:id", async (req: Request, res: Response) => {
+router.put("/situations/:id", verifyToken, async (req: Request, res: Response) => {
     try {
 
         const { id } = req.params;
@@ -186,7 +187,7 @@ router.put("/situations/:id", async (req: Request, res: Response) => {
 
 
 //Remover a visualização do item cadastrado em situação
-router.delete("/situations/:id", async (req: Request, res: Response) => {
+router.delete("/situations/:id", verifyToken, async (req: Request, res: Response) => {
     try {
 
         const { id } = req.params;
@@ -227,7 +228,7 @@ router.delete("/situations/:id", async (req: Request, res: Response) => {
 
 
 //Criar a LISTA de situações cadastradas no banco de dados    
-router.post("/situations", async (req: Request, res: Response) => {
+router.post("/situations", verifyToken, async (req: Request, res: Response) => {
     try {
         var data = req.body;
 

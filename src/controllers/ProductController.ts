@@ -8,12 +8,13 @@ import { PaginationService } from "../services/PaginationServices";
 import * as yup from 'yup';
 import slugify from "slugify";
 import { Not } from "typeorm";
+import { verifyToken } from "../middlewares/authMiddleware";
 
 
 const router = express.Router();
 
 // Buscar lista de produtos com paginação e relações
-router.get("/products", async (req: Request, res: Response) => {
+router.get("/products", verifyToken, async (req: Request, res: Response) => {
     try {
         const productRepository = AppDataSource.getRepository(Product);
         const page = Number(req.query.page) || 1;
@@ -33,7 +34,7 @@ router.get("/products", async (req: Request, res: Response) => {
 });
 
 // Buscar produto por ID (trazendo categoria e situação)
-router.get("/products/:id", async (req: Request, res: Response) => {
+router.get("/products/:id", verifyToken, async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
         const productRepository = AppDataSource.getRepository(Product);
@@ -58,7 +59,7 @@ router.get("/products/:id", async (req: Request, res: Response) => {
 });
 
 // Cadastrar novo produto
-router.post("/products", async (req: Request, res: Response) => {
+router.post("/products", verifyToken, async (req: Request, res: Response) => {
     try {
         var data = req.body;
 
@@ -195,7 +196,7 @@ router.post("/products", async (req: Request, res: Response) => {
 });
 
 // Atualizar produto
-router.put("/products/:id", async (req: Request, res: Response) => {
+router.put("/products/:id", verifyToken, async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
 
@@ -334,7 +335,7 @@ router.put("/products/:id", async (req: Request, res: Response) => {
 });
 
 // Remover produto
-router.delete("/products/:id", async (req: Request, res: Response) => {
+router.delete("/products/:id", verifyToken, async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
         const productRepo = AppDataSource.getRepository(Product);

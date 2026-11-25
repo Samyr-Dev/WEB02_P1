@@ -7,6 +7,8 @@ import crypto from "crypto";
 import nodemailer from "nodemailer";
 import { verifyToken } from "../middlewares/authMiddleware";
 
+//Retirado o verifyToken da rota /new-user, pois como é pra uma "pessoa externa", não faz sentido exigir autenticação nesse momento.
+
 const router = express.Router();
 
 router.post("/", async (req: Request, res: Response) => {
@@ -49,7 +51,7 @@ router.get("/validate-token", verifyToken, async (req: Request, res: Response) =
 
 })
 
-router.post("/new-user", verifyToken, async (req: Request, res: Response) => {
+router.post("/new-user", async (req: Request, res: Response) => {
     try {
 
         var data = req.body;
