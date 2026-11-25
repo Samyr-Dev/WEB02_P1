@@ -1,6 +1,6 @@
 # Projeto WEB02 - P1 e P2
 
-![License](https://img.shields.io/badge/License-ISC-blue.svg)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
 
 Sistema desenvolvido para a disciplina de Web 02, focado em uma API REST utilizando Node.js, TypeScript e MySQL. O projeto contempla autenticação JWT, recuperação de senha via e-mail, paginação de resultados e validação de dados com Yup.
 
