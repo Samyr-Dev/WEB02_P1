@@ -33,9 +33,17 @@ export class Users {
     @BeforeInsert()
     @BeforeUpdate()
     async hashPassword(): Promise<void>{
-        if (this.password){
+        // Só criptografa se a senha ainda não for um hash do bcrypt (que sempre começa com "$2"),
+        // senão, ao editar o usuário, a senha já criptografada era criptografada de novo e o login parava de funcionar.
+        if (this.password && !this.password.startsWith("$2")){
             this.password = await bcrypt.hash(this.password, 10)
         }
+    }
+
+    // Remove a senha e a chave de recuperação de qualquer resposta em JSON da API.
+    toJSON() {
+        const { password, recoverPassword, ...user } = this;
+        return user;
     }
 
 
